@@ -2,6 +2,15 @@ import { LinksFunction, LoaderFunction } from "@remix-run/node"
 import { Outlet, useCatch } from "@remix-run/react"
 import styles from "~/styles/dashboard.css"
 import { requireUserProfile } from "~/utils/session.server"
+import {
+  initPlasmicLoader,
+  PlasmicRootProvider,
+  PlasmicComponent,
+  ComponentRenderData
+} from '@plasmicapp/loader-react';
+import { PLASMIC } from '../plasmic-init';
+import { useLoaderData } from '@remix-run/react';
+import { json } from '@remix-run/node';
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: styles }]
@@ -37,3 +46,18 @@ export const ErrorBoundary = ({ error }: { error: Error }) => {
     </div>
   )
 }
+
+export const loader = async () => {
+  const plasmicData = await PLASMIC.fetchComponentData('Homepage');
+return json(plasmicData);
+};
+
+export default function MyPage() {
+  const plasmicData = useLoaderData();
+  return (
+    <PlasmicRootProvider loader={PLASMIC} prefetchedData={plasmicData}>
+      <PlasmicComponent component="Homepage" />
+    </PlasmicRootProvider>
+  );
+}; 
+
